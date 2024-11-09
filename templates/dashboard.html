@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sopanel Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="sidebar" id="sidebar">
+            <div class="logo">Sopanel</div>
+            <ul>
+                <li><a href="/" class="active">Dashboard</a></li>
+                <li><a href="{{ url_for('connect_devices') }}">Connect Devices</a></li>
+                
+                <li><a href="{{ url_for('historical_data') }}">Historical Data</a></li>
+               
+                <li><a href="{{ url_for('logout') }}" id="logoutButton">Logout</a></li>
+            </ul>
+        </nav>
+        <main class="main-content">
+            <header>
+                <button id="sidebarCollapse" class="sidebar-toggle">☰</button>
+                <h1>Solar Panel Dashboard</h1>
+                <button id="alertToggle" class="alert-toggle">🔔</button>
+                <button id="dataSourceToggle">Toggle Data Source</button>
+                <!-- Add this new button for historical data -->
+                
+            </header>
+            <div id="notification-area" class="notification-area hidden">
+                <!-- Notifications will be dynamically added here -->
+            </div>
+            <div class="dashboard-grid">
+                <section class="dashboard-item energy-production">
+                    <h2>Energy Production</h2>
+                    <div class="chart-container">
+                        <canvas id="energyProductionChart"></canvas>
+                    </div>
+                </section>
+                <section class="dashboard-item weather-forecast">
+                    <h2>Weather Forecast</h2>
+                    <div id="weatherForecast" class="forecast-cards"></div>
+                </section>
+                <section class="dashboard-item energy-consumption">
+                    <h2>Energy Consumption</h2>
+                    <div class="chart-container">
+                        <canvas id="energyConsumptionChart"></canvas>
+                    </div>
+                </section>
+                <section class="dashboard-item solar-performance">
+                    <h2>Solar Performance</h2>
+                    <div class="chart-container">
+                        <canvas id="solarPerformanceChart"></canvas>
+                    </div>
+                </section>
+                <section class="dashboard-item predictive-maintenance">
+                    <h2>Predictive Maintenance</h2>
+                    <div id="maintenancePredictions"></div>
+                </section>
+                <section class="dashboard-item current-weather">
+                    <h2>Current Weather</h2>
+                    <div id="currentWeather" class="weather-display"></div>
+                </section>
+                <section class="dashboard-item system-status">
+                    <h2>System Status</h2>
+                    <div id="systemStatus"></div>
+                </section>
+            </div>
+        </main>
+    </div>
+    <div id="error-container"></div>
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+    <script>
+        document.getElementById('myButton').addEventListener('click', function() {
+            alert('This is a message');
+        });
+
+        // Add this script for logout confirmation
+        document.getElementById('logoutButton').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = this.href;
+            }
+        });
+    </script>
+</body>
+</html>

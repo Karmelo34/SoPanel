@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historical Data</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Historical Data</h1>
+    <div>
+        <label for="start_date">Start Date:</label>
+        <input type="text" id="start_date" name="start_date" value="{{ start_date }}">
+        <label for="end_date">End Date:</label>
+        <input type="text" id="end_date" name="end_date" value="{{ end_date }}">
+        <button onclick="updateData()">Update</button>
+    </div>
+
+    <div id="loadingIndicator" style="display: none;">
+        Loading data...
+    </div>
+
+    <div id="errorMessage" style="color: red; display: none;"></div>
+
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Energy Production</th>
+                <th>Solar Irradiance</th>
+                <th>Panel Temperature</th>
+                <th>Ambient Temperature</th>
+                <th>Efficiency</th>
+                <th>Weather Condition</th>
+                <th>System Status</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+  
+
+    <script>
+        flatpickr("#start_date", {
+            dateFormat: "Y-m-d"
+        });
+        flatpickr("#end_date", {
+            dateFormat: "Y-m-d"
+        });
+
+        let chart;
+
+        async function updateData() {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            try {
+                loadingIndicator.style.display = 'block';
+                errorMessage.style.display = 'none';
+                
+                const startDate = document.getElementById('start_date').value;
+                const endDate = document.getElementById('end_date').value;
+                
+                const response = await fetch(`/api/historical_data?start_date=${startDate}&end_date=${endDate}`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                
+                const data = await response.json();
+                
+                if (data.length === 0) {
+                    errorMessage.textContent = 'No data available for the selected date range';
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+                
+                updateTable(data);
+                updateChart(data);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                errorMessage.textContent = 'Error loading data. Please try again.';
+                errorMessage.style.display = 'block';
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        }
+
+        function updateTable(data) {
+            const tbody = document.querySelector('#dataTable tbody');
+            tbody.innerHTML = '';
+            data.forEach(entry => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = new Date(entry.timestamp).toLocaleString();
+                row.insertCell(1).textContent = entry.energy_production.toFixed(2);
+                row.insertCell(2).textContent = entry.solar_irradiance.toFixed(2);
+                row.insertCell(3).textContent = entry.panel_temperature.toFixed(2);
+                row.insertCell(4).textContent = entry.ambient_temperature.toFixed(2);
+                row.insertCell(5).textContent = entry.efficiency.toFixed(2);
+                row.insertCell(6).textContent = entry.weather_condition;
+                row.insertCell(7).textContent = entry.system_status;
+            });
+        }
+
+        function updateChart(data) {
+            const ctx = document.getElementById('energyChart').getContext('2d');
+            const labels = data.map(entry => new Date(entry.timestamp).toLocaleDateString());
+            const energyProduction = data.map(entry => entry.energy_production);
+
+            if (chart) {
+                chart.destroy();
+            }
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Energy Production',
+                        data: energyProduction,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            reverse: true
+                        }
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', updateData);
+    </script>
+</body>
+</html>

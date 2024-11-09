@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect Devices - Sopanel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="sidebar" id="sidebar">
+            <div class="logo">Sopanel</div>
+            <ul>
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="/connect_devices" class="active">Connect Devices</a></li>
+                <!-- Add other menu items as needed -->
+            </ul>
+        </nav>
+        <main class="main-content">
+            <header>
+                <button id="sidebarCollapse" class="sidebar-toggle">☰</button>
+                <h1>Connect Devices</h1>
+            </header>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <section class="available-devices">
+                <h2>Available Devices</h2>
+                <form action="{{ url_for('connect_devices') }}" method="post">
+                    <select name="device_id" required>
+                        {% for device in available_devices %}
+                            <option value="{{ device.device_id }}">{{ device.name }} ({{ device.type }})</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-primary">Connect Device</button>
+                </form>
+            </section>
+            
+            <section class="connected-devices">
+                <h2>Connected Devices</h2>
+                <ul>
+                    {% for device in user_devices %}
+                        <li>{{ device.name }} ({{ device.type }}) - {{ device.ip }}:{{ device.port }}</li>
+                    {% endfor %}
+                </ul>
+            </section>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+</body>
+</html>

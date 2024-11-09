@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Sopanel</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='settings.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="sidebar" id="sidebar">
+            <div class="logo">Sopanel</div>
+            <ul>
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="/devices">Connect Devices</a></li>
+                <li><a href="/settings" class="active">Settings</a></li>
+                <li><a href="/logout" id="logoutButton">Logout</a></li>
+            </ul>
+        </nav>
+        <main class="main-content">
+            <header>
+                <button id="sidebarCollapse" class="sidebar-toggle">☰</button>
+                <h1>Settings</h1>
+            </header>
+
+            <div class="settings-container">
+                <!-- User Profile Section -->
+                <section class="settings-section">
+                    <h2>User Profile</h2>
+                    <form id="profileForm" class="settings-form">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" value="{{ current_user.username }}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" value="{{ current_user.notification_email }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" value="{{ current_user.notification_phone }}">
+                        </div>
+                        <button type="submit">Update Profile</button>
+                    </form>
+                </section>
+
+                <!-- Notification Preferences Section -->
+                <section class="settings-section">
+                    <h2>Notification Preferences</h2>
+                    <form id="notificationForm" class="settings-form">
+                        <div class="form-group">
+                            <h3>Notification Methods</h3>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="notification_method" value="email" 
+                                           {% if 'email' in current_user.notification_preferences %}checked{% endif %}>
+                                    Email Notifications
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="notification_method" value="sms"
+                                           {% if 'sms' in current_user.notification_preferences %}checked{% endif %}>
+                                    SMS Notifications
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <h3>Alert Types</h3>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="alert_type" value="critical"
+                                           {% if 'critical' in current_user.alert_preferences %}checked{% endif %}>
+                                    Critical Alerts
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="alert_type" value="warning"
+                                           {% if 'warning' in current_user.alert_preferences %}checked{% endif %}>
+                                    Warning Alerts
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="alert_type" value="info"
+                                           {% if 'info' in current_user.alert_preferences %}checked{% endif %}>
+                                    Information Updates
+                                </label>
+                            </div>
+                        </div>
+                        <button type="submit">Save Preferences</button>
+                    </form>
+                </section>
+
+                <!-- System Preferences Section -->
+                <section class="settings-section">
+                    <h2>System Preferences</h2>
+                    <form id="systemPreferencesForm" class="settings-form">
+                        <div class="form-group">
+                            <label for="timezone">Timezone</label>
+                            <select id="timezone" name="timezone">
+                                <option value="UTC">UTC</option>
+                                <option value="Africa/Lusaka">Africa/Lusaka</option>
+                                <!-- Add more timezone options as needed -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="updateFrequency">Data Update Frequency</label>
+                            <select id="updateFrequency" name="updateFrequency">
+                                <option value="1">Every minute</option>
+                                <option value="5">Every 5 minutes</option>
+                                <option value="15">Every 15 minutes</option>
+                                <option value="30">Every 30 minutes</option>
+                            </select>
+                        </div>
+                        <button type="submit">Save System Preferences</button>
+                    </form>
+                </section>
+
+                <!-- Database Export Section -->
+                <section class="settings-section">
+                    <h2>Database Export</h2>
+                    <div class="form-group">
+                        <a href="{{ url_for('export_database') }}" class="btn btn-primary">
+                            Export Database to CSV
+                        </a>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='settings.js') }}"></script>
+</body>
+</html>

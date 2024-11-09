@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sopanel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="auth-page" data-theme="light">
+    <div class="auth-container">
+        <div class="auth-header">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="auth-logo">
+            <h2 class="auth-title">Welcome back</h2>
+            <p class="auth-subtitle">Sign in to continue to your account</p>
+        </div>
+
+        {% if config.OAUTH_ENABLED %}
+        <div class="social-auth">
+            <button class="social-button google" onclick="window.location.href='{{ url_for(google_login) }}'">
+                <i class="fab fa-google"></i>
+                Continue with Google
+            </button>
+        </div>
+
+        <div class="divider">
+            <span>or continue with email</span>
+        </div>
+        {% endif %}
+
+        <form class="auth-form" method="post">
+            {{ form.csrf_token }}
+            
+            <div class="floating-input">
+                <i class="input-icon fas fa-envelope"></i>
+                {{ form.username(class="form-input", placeholder=" ") }}
+                <label class="floating-label">Username or Email</label>
+                {% if form.username.errors %}
+                    <span class="error-message">{{ form.username.errors[0] }}</span>
+                {% endif %}
+            </div>
+
+            <div class="floating-input">
+                <i class="input-icon fas fa-lock"></i>
+                {{ form.password(class="form-input", placeholder=" ") }}
+                <button type="button" class="toggle-password" aria-label="Toggle password visibility">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <label class="floating-label">Password</label>
+                {% if form.password.errors %}
+                    <span class="error-message">{{ form.password.errors[0] }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-footer">
+                <label class="checkbox-wrapper">
+                    {{ form.remember(class="checkbox-input") }}
+                    <span class="checkbox-label">Remember me</span>
+                </label>
+                <a href="" class="forgot-link">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="auth-button">
+                <span class="button-text">Sign In</span>
+                <div class="button-loader hidden"></div>
+            </button>
+        </form>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} auth-transition">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="auth-footer">
+            <p>Don't have an account? <a href="{{ url_for('register') }}">Sign up</a></p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+</body>
+</html>

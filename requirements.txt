@@ -1,0 +1,11 @@
+Flask==2.3.2
+Flask-SQLAlchemy==3.0.4
+Flask-Migrate==4.0.4
+Flask-Login==0.6.3
+Flask-SocketIO==5.3.4
+Flask-WTF==1.1.1
+Flask-Limiter==2.7.0
+apscheduler==3.10.1
+python-socketio==5.8.0
+eventlet==0.33.3
+gunicorn==21.2.0

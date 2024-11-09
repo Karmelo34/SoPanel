@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect Devices - Sopanel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="sidebar" id="sidebar">
+            <div class="logo">Sopanel</div>
+            <ul>
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="/devices" class="active">Connect Devices</a></li>
+                <!-- Add other menu items as needed -->
+            </ul>
+        </nav>
+        <main class="main-content">
+            <header>
+                <button id="sidebarCollapse" class="sidebar-toggle">☰</button>
+                <h1>Connect Devices</h1>
+            </header>
+            <div class="device-connection">
+                <h2>Add New Device</h2>
+                <form id="deviceForm">
+                    <input type="text" id="deviceName" placeholder="Device Name" required>
+                    <select id="deviceType" required>
+                        <option value="">Select Device Type</option>
+                        <option value="solar_panel">Solar Panel</option>
+                        <option value="inverter">Inverter</option>
+                        <option value="battery">Battery</option>
+                        <option value="smart_meter">Smart Meter</option>
+                    </select>
+                    <input type="text" id="deviceLocation" placeholder="Device Location" required>
+                    <input type="text" id="deviceIP" placeholder="Device IP Address" required>
+                    <input type="text" id="devicePort" placeholder="Device Port" required>
+                    <input type="text" id="deviceProtocol" placeholder="Communication Protocol (e.g., MQTT, ModBus)" required>
+                    <button type="submit">Connect Device</button>
+                </form>
+                <div id="deviceList">
+                    <h3>Connected Devices</h3>
+                    <!-- Device list will be populated here -->
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='devices.js') }}"></script>
+</body>
+</html>
