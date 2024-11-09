@@ -11,3 +11,4 @@ eventlet==0.33.3
 gunicorn==21.2.0
 requests>=2.31.0
 Werkzeug==2.3.7
+Flask-SocketIO==5.3.6
