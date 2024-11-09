@@ -26,6 +26,9 @@ app.config["SECRET_KEY"] = '123456789'
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+# Add this line to create the socketio instance
+socketio = SocketIO(app)
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -436,7 +439,8 @@ if __name__ == '__main__':
 
     
 
-    app.run(debug=True, port=5000)
+    # Use socketio.run instead of app.run
+    socketio.run(app, debug=True, port=5000)
 
 @app.route('/api/submit_data', methods=['POST'])
 def submit_data():
