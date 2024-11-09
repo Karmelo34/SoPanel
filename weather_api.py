@@ -1,6 +1,5 @@
 import requests
 from datetime import datetime, timedelta
-from django.utils import timezone # type: ignore
 import time
 
 API_KEY = '015807b3736641ea8d5171154241810'  
@@ -88,3 +87,10 @@ def fetch_forecast_data(location, days=3):
         return forecast_data
     else:
         raise Exception(f"Error fetching forecast data: {response.status_code}")
+
+# Remove or update these functions as they use a different API
+# def get_weather_data(lusaka):
+#     ...
+
+# def get_forecast_data(lusaka):
+#     ...
