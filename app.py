@@ -1,10 +1,7 @@
 from random import random
 from flask import Flask, render_template, jsonify, request, redirect, url_for, flash, current_app, send_file
 from datetime import datetime, timedelta
-
 import socketio
-from device_manager import aggregate_device_data
-from models import User 
 from weather_api import fetch_current_weather, fetch_forecast_data, fetch_historical_weather_data
 from pv_simulator import PVSimulator
 from flask_sqlalchemy import SQLAlchemy
@@ -20,13 +17,8 @@ import shutil
 import os
 import csv
 
+from flask_wtf import CSRFProtect
 from apscheduler.schedulers.background import BackgroundScheduler
-
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-from flask_wtf.csrf import CSRFProtect
-from forms import LoginForm
-from urllib.parse import urlparse, urljoin
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite:///solar_data.db'
@@ -226,10 +218,6 @@ def get_weather_icon(condition):
     else:
         return '🌤️'  # Default to partly sunny
 
-@app.route('/api/system_status')
-def system_status():
-    data = aggregate_device_data()
-    return jsonify(data)
 
 @app.route('/historical_data')
 def historical_data():
@@ -302,7 +290,7 @@ def populate_db():
         db.session.commit()
     
     if SolarData.query.first() is None:
-        # Use historical data from dashboard
+        # Use historical data from your dashboard
         historical_data = [
             {
                 "timestamp": "2024-10-25 10:00:00",
@@ -336,56 +324,7 @@ def populate_db():
 
         db.session.commit()
 
-def discover_devices():
-    
-    with app.app_context():
-        while True:
-            
-            discovery_socket = None
-            for port in DISCOVERY_PORT_RANGE:
-                try:
-                    
-                    with closing(socket.socket(socket.AF_INET, socket.SOCK_DGRAM)) as discovery_socket:
-                        discovery_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-                        discovery_socket.bind(("", port))
-                        
-                        print(f"Listening for device broadcasts on port {port}...")
-                        discovery_socket.settimeout(5)  # Set a timeout for receiving data
-                        data, addr = discovery_socket.recvfrom(1024)
-                        device_info = json.loads(data.decode())
-                        
-                        existing_device = Device.query.filter_by(device_id=device_info['device_id']).first()
-                        if not existing_device:
-                            new_device = Device(
-                                device_id=device_info['device_id'],
-                                name=f"{device_info['device_type']}_{device_info['device_id']}",
-                                type=device_info['device_type'],
 
-                                ip=device_info['ip'],
-                                port=device_info['port'],
-
-                                user_id=1  # Assign to a default user for now
-                            )
-                            db.session.add(new_device)
-                            db.session.commit()
-                            print(f"New device discovered: {new_device.name}")
-                        else:
-                            print(f"Device already exists: {existing_device.name}")
-                        
-                        # If we successfully bind and receive data, break out of the port loop
-                        break
-                except socket.timeout:
-                    print(f"No devices found on port {port}")
-                except OSError as e:
-                    if e.errno == 10048:  # Port is in use
-                        print(f"Port {port} is in use, trying next port")
-                    else:
-                        print(f"Error in device discovery: {str(e)}")
-                except Exception as e:
-                    print(f"Error in device discovery: {str(e)}")
-            
-            # Wait before trying again
-            time.sleep(5)
 
 def connect_to_device(device):
     """Connect to device and start data collection"""
@@ -454,28 +393,15 @@ def register():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    form = LoginForm()
-    
-    if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        
-        if user and user.check_password(form.password.data):
-            login_user(user, remember=form.remember.data)
-            next_page = request.args.get('next')
-            if next_page and url_is_safe(next_page):
-                return redirect(next_page)
-            return redirect(url_for('dashboard'))
-            
-        flash('Invalid username or password', 'error')
-        return render_template('login.html', form=form), 401
-        
-    return render_template('login.html', form=form)
-
-def url_is_safe(url):
-    """Check if URL is safe for redirects"""
-    ref_url = urlparse(request.host_url)
-    test_url = urlparse(urljoin(request.host_url, url))
-    return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
+    if request.method == "POST":
+        user = User.query.filter_by(username=request.form.get("username")).first()
+        if user and user.password == request.form.get("password"):
+            login_user(user)
+            flash('Logged in successfully.', 'success')
+            return redirect(url_for("dashboard"))
+        else:
+            flash('Invalid username or password.', 'error')
+    return render_template("login.html")
 
 @app.route("/logout")
 
@@ -513,10 +439,7 @@ if __name__ == '__main__':
 
 
     
-    # Start device discovery in a separate thread
-    discovery_thread = threading.Thread(target=discover_devices, daemon=True)
-    discovery_thread.start()
-    
+
     app.run(debug=True, port=5000)
 
 @app.route('/api/submit_data', methods=['POST'])
@@ -820,11 +743,3 @@ def get_historical_data():
     } for entry in historical_data]
     
     return jsonify(data)
-
-# Initialize security extensions first, before routes
-csrf = CSRFProtect(app)
-limiter = Limiter(
-    app=app,
-    key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"]
-)
