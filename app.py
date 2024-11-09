@@ -31,7 +31,7 @@ socketio = SocketIO(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = 'login'
+login_manager.login_view = 'login.html'
 
 pv_system = PVSimulator()
 LOCATION = "Lusaka"
@@ -411,7 +411,7 @@ def login():
 def logout():
     logout_user()
     flash('You have been logged out successfully.', 'success')
-    return redirect(url_for('login'))
+    return redirect(url_for('login.html'))
 
 
 @app.route("/")
