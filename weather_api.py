@@ -88,10 +88,5 @@ def fetch_forecast_data(location, days=3):
     else:
         raise Exception(f"Error fetching forecast data: {response.status_code}")
 
-# Remove or update these functions as they use a different API
-# def get_weather_data(lusaka):
-#     ...
 
-# def get_forecast_data(lusaka):
-#     ...
 
