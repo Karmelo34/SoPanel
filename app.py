@@ -74,7 +74,7 @@ class Device(db.Model):
 
 @app.route('/')
 def index():
-    return render_template('dashboard.html')
+    return render_template('signup.html')
 
 def generate_mock_data():
     now = datetime.now()
@@ -736,3 +736,4 @@ def get_historical_data():
     } for entry in historical_data]
     
     return jsonify(data)
+
