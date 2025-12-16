@@ -18,6 +18,7 @@ import os
 import csv
 
 from flask_wtf import CSRFProtect
+from forms import LoginForm
 from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
@@ -26,12 +27,12 @@ app.config["SECRET_KEY"] = '123456789'
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-# Add this line to create the socketio instance
-socketio = SocketIO(app)
+
+socketio = SocketIO(app, async_mode="threading")
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = 'login.html'
+login_manager.login_view = 'login'
 
 pv_system = PVSimulator()
 LOCATION = "Lusaka"
@@ -269,10 +270,10 @@ def api_historical_data():
 
 # Add this function to populate the database with some initial data
 def populate_db():
-    # Check if the default user already exists
+   
     default_user = User.query.filter_by(username="default_user").first()
     if not default_user:
-        # Create a default user only if it doesn't exist
+      
         default_user = User(username="default_user", password="default_password")
         db.session.add(default_user)
         db.session.commit()
@@ -396,27 +397,37 @@ def register():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == "POST":
-        user = User.query.filter_by(username=request.form.get("username")).first()
-        if user and user.password == request.form.get("password"):
-            login_user(user)
-            flash('Logged in successfully.', 'success')
-            return redirect(url_for("dashboard"))
+    # If the user is already authenticated, send them to the dashboard
+    if current_user.is_authenticated:
+        return redirect(url_for("dashboard"))
+
+    form = LoginForm()
+
+    if form.validate_on_submit():
+        # Basic lookup by username. You can later extend this to also match on email.
+        user = User.query.filter_by(username=form.username.data).first()
+
+        if user and user.password == form.password.data:
+            # Log the user in and optionally remember the session
+            login_user(user, remember=form.remember.data)
+
+            # Respect "next" query parameter if present (for protected redirects)
+            next_page = request.args.get("next")
+            return redirect(next_page) if next_page else redirect(url_for("dashboard"))
         else:
-            flash('Invalid username or password.', 'error')
-    return render_template("login.html")
+            flash("Invalid username or password.", "error")
+
+    return render_template("login.html", form=form)
+
 
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     flash('You have been logged out successfully.', 'success')
-    return redirect(url_for('login.html'))
+    return redirect(url_for('login'))
 
 
-@app.route("/")
-def home():
-    return render_template("dashboard.html")
 
 
 @app.route('/dashboard')
@@ -736,4 +747,3 @@ def get_historical_data():
     } for entry in historical_data]
     
     return jsonify(data)
-
