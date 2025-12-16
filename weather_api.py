@@ -2,7 +2,7 @@ import requests
 from datetime import datetime, timedelta
 import time
 
-API_KEY = '015807b3736641ea8d5171154241810'  
+API_KEY = '972bcfc0e4e54949b1765803252503'  
 BASE_URL = 'https://api.weatherapi.com/v1'  # Changed to HTTPS
 location = "lusaka"
 
@@ -94,3 +94,4 @@ def fetch_forecast_data(location, days=3):
 
 # def get_forecast_data(lusaka):
 #     ...
+
